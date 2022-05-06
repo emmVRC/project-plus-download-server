@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/sha256"
-	"encoding/base64"
 	"flag"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -14,7 +13,6 @@ import (
 
 var DllPath string
 var DllData []byte
-var DllBase64Data string
 var DllHash string
 
 var ShouldLoad bool
@@ -38,12 +36,12 @@ func init() {
 	}
 
 	DllHash = fmt.Sprintf("%x", sha256.Sum256(DllData))
-	DllBase64Data = base64.StdEncoding.EncodeToString(DllData)
 }
 
 func main() {
 	app := fiber.New()
 
+	app.Get("/should_load", shouldLoad)
 	app.Get("/:hash", downloadMod)
 
 	log.Fatal(app.Listen(":3000"))
@@ -51,7 +49,7 @@ func main() {
 
 func shouldLoad(c *fiber.Ctx) error {
 	c.Set("surrogate-key", "mod-resource")
-	
+
 	if ShouldLoad {
 		return c.SendStatus(200)
 	}
@@ -67,5 +65,5 @@ func downloadMod(c *fiber.Ctx) error {
 	c.Set("content-type", "application/octet-stream")
 	c.Set("surrogate-key", "mod-resource")
 
-	return c.SendString(DllBase64Data)
+	return c.Send(DllData)
 }
