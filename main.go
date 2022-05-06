@@ -67,12 +67,13 @@ func shouldLoad(c *fiber.Ctx) error {
 }
 
 func downloadMod(c *fiber.Ctx) error {
+	c.Set("surrogate-key", "mod-resource")
+
 	if strings.ToLower(c.Params("hash")) == DllHash {
 		return c.SendStatus(204)
 	}
 
 	c.Set("content-type", "application/octet-stream")
-	c.Set("surrogate-key", "mod-resource")
 
 	return c.Send(DllData)
 }
