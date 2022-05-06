@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/compress"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"io"
 	"log"
 	"os"
@@ -39,7 +41,14 @@ func init() {
 }
 
 func main() {
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		Prefork: true,
+	})
+
+	app.Use(recover.New())
+	app.Use(compress.New(compress.Config{
+		Level: compress.LevelBestSpeed,
+	}))
 
 	app.Get("/should_load", shouldLoad)
 	app.Get("/:hash", downloadMod)
